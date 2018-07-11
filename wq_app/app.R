@@ -19,10 +19,10 @@ ui <- fluidPage(theme = shinytheme("yeti"),
       h3("Continuous Data"),
     
       selectInput("site1", label= h4("Site"), 
-                  choices=unique(sensor$Site)),
+                  choices=c("None" = 0,unique(wq$Site)), selected = "1"),
       
       selectInput("site2", label=h4("Comparison"), 
-                  choices=c("None" = 0,unique(sensor$Site))),
+                  choices=c("None" = 0,unique(wq$Site)), selected = "6"),
       
       dateRangeInput("date",
                      label =h4('Date range'),
@@ -70,13 +70,13 @@ server <- shinyServer(function(input, output) {
     
   sensorplot <- reactive({
 
-      sensor <- sensor %>% 
+      wq <- wq %>% 
         filter(Site == input$site1 | Site == input$site2,
                Date >= input$date[1] & Date <= input$date[2]) %>% 
                select(Site, Date, input$variable) %>% 
                  gather("Variable", "Measurement", input$variable)
     
-    ggplot(sensor, aes(x = Date, y = Measurement)) +
+    ggplot(wq, aes(x = Date, y = Measurement)) +
       geom_point() +
       scale_x_datetime(
         breaks = date_breaks("month") ,
@@ -86,7 +86,7 @@ server <- shinyServer(function(input, output) {
     
     
     if (input$site2 == 0) {
-          ggplot(sensor, aes(x = Date, y = Measurement)) +
+          ggplot(wq, aes(x = Date, y = Measurement)) +
           geom_point() +
           scale_x_datetime(
             breaks = date_breaks("month") ,
@@ -97,7 +97,7 @@ server <- shinyServer(function(input, output) {
               ylab("")
       
          } else {
-            ggplot(sensor, aes(x = Date, y = Measurement)) +
+            ggplot(wq, aes(x = Date, y = Measurement)) +
             geom_point() +
             scale_x_datetime(
                breaks = date_breaks("month") ,
