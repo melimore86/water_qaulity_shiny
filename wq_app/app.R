@@ -5,6 +5,8 @@ library("ggplot2")
 library("scales")
 library("gridExtra")
 
+#wq <- read.csv("wq.csv", header= T)
+#lab <- read.csv("lab.csv", header= T) 
 
 
 #### Front 
@@ -67,7 +69,7 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   
 
 server <- shinyServer(function(input, output) {
-    
+ 
   sensorplot <- reactive({
 
       wq <- wq %>% 
@@ -82,7 +84,7 @@ server <- shinyServer(function(input, output) {
         breaks = date_breaks("month") ,
         labels = date_format("%m/%Y")) +
       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
-      facet_wrap(~Site, ncol = 1, scales = "free_y")
+      facet_wrap(~Site, ncol = 1)
     
     
     if (input$site2 == 0) {
@@ -93,7 +95,7 @@ server <- shinyServer(function(input, output) {
             labels = date_format("%m/%Y")) +
         theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
               axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), text = element_text(size=12)) +
-              facet_wrap(~Site, ncol = 1, scales = "free_y") +
+              facet_wrap(~Site, ncol = 1) +
               ylab("")
       
          } else {
@@ -105,7 +107,7 @@ server <- shinyServer(function(input, output) {
             theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, 
             linetype="solid"),axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), 
             text = element_text(size=12)) +
-            facet_wrap(~Site, ncol = 1, scales = "free_y") +
+            facet_wrap(~Site, ncol = 1) +
             ylab("")
          }
     
