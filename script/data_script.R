@@ -26,7 +26,7 @@ dbListTables(con)
 wq <- dbReadTable(conn = con, name = 'lcroyster_buoyobservation')
 
 #Changing the format of a new date for ggplot, plotting, Posixct
-wq$date<- as.POSIXct(as.Date(wq$observation_datetime, tz="EST",usetz=TRUE))
+wq$date<- as.POSIXct(wq$observation_datetime, tz="EST",usetz=TRUE)
 
 #Changing the format for these date for filtere in dplyr
 wq$observation_datetime<- as.Date(wq$observation_datetime, tz="EST",usetz=TRUE)
@@ -54,11 +54,11 @@ wq<-wq %>%
 #write.csv(wq, file = "wq.csv")
 
 ###Lakewatch Data, in .csv
-lab <- read.csv("data/discrete_measurement.csv", header= T)
+lab <- read.csv("wq_app/data/discrete_measurement.csv", header= T)
 
 colnames(lab) <- c("Site", "Date", "Time_org", "Time_UTC", "Sun_code", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "DO", "Temperature","Conductivity", "Salinity", "Depth", "Sensor_Type")
 
-lab$Date <- as.POSIXct(as.Date(lab$Date,origin= "1899-12-30"))
+lab$Date <- as.Date(lab$Date)
 
 lab$Secchi<- (lab$Secchi/ 3.28)
 

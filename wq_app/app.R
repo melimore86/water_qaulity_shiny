@@ -5,8 +5,12 @@ library("ggplot2")
 library("scales")
 library("gridExtra")
 
-#wq <- read.csv("wq.csv", header= T)
-#lab <- read.csv("lab.csv", header= T) 
+wq <- read.csv("data/wq.csv", header= T)
+lab <- read.csv("data/lab.csv", header= T) 
+
+wq$Date<- as.POSIXct(wq$Date, tz="EST",usetz=TRUE)
+lab$Date <- as.Date(lab$Date)
+
 
 
 #### Front 
@@ -69,6 +73,13 @@ ui <- fluidPage(theme = shinytheme("yeti"),
   
 
 server <- shinyServer(function(input, output) {
+  
+  #wq <- read.csv("data/wq.csv", header= T)
+  #lab <- read.csv("data/lab.csv", header= T) 
+  
+  #wq$Date<- as.Date(wq$Date, tz="EST",usetz=TRUE)
+  #lab$Date<- as.Date(lab$Date, tz="EST",usetz=TRUE)
+  
  
   sensorplot <- reactive({
 
@@ -123,7 +134,7 @@ labplot <- reactive({
   
     ggplot(lab, aes(x = Date, y = Measurement)) +
       geom_point() +
-      scale_x_datetime(
+      scale_x_date(
         breaks = date_breaks("month") ,
         labels = date_format("%m/%Y")) +
       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
@@ -133,7 +144,7 @@ labplot <- reactive({
     if (input$site2 == 0) {
       ggplot(lab, aes(x = Date, y = Measurement)) +
         geom_point() +
-        scale_x_datetime(
+        scale_x_date(
           breaks = date_breaks("month") ,
           labels = date_format("%m/%Y")) +
         theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
@@ -144,7 +155,7 @@ labplot <- reactive({
     } else {
       ggplot(lab, aes(x = Date, y = Measurement)) +
         geom_point() +
-        scale_x_datetime(
+        scale_x_date(
           breaks = date_breaks("month") ,
           labels = date_format("%m/%Y")) +
         theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, 
