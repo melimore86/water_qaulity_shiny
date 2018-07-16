@@ -1,0 +1,9 @@
+- There are data for Site = 0. What would they mean?
+- Sensorplot: the ggplot before if (input$site2 == 0) statement is "not in used"
+- With or without the if (input$site2 == 0) statement, the plot would be the same.
+- Question here is what do we want when one of the sites are 0, and when both of the sites are 0 (or identical).
+- Unique and sort the site/comparison
+- Does the "site1" always go on top and "site2" always below? Right now it doesn't
+- Checkbox button for discrete data?
+- Labelling of discrete data
+- Stacking of Lakewatch vs YSI plot?
