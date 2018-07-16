@@ -15,20 +15,20 @@ lab$Date <- as.Date(lab$Date)
 
 #### Front 
 
-ui <- fluidPage(theme = shinytheme("yeti"),
-
+ui <- fluidPage(
+  
+  theme = shinytheme("yeti"),
 
   sidebarLayout(
     sidebarPanel(
-      
     
       h3("Continuous Data"),
     
       selectInput("site1", label= h4("Site"), 
-                  choices=c("None" = 0,unique(wq$Site)), selected = "1"),
+                  choices=c("None" = 0, unique(wq$Site) %>% sort()), selected = "1"),
       
       selectInput("site2", label=h4("Comparison"), 
-                  choices=c("None" = 0,unique(wq$Site)), selected = "6"),
+                  choices=c("None" = 0, unique(wq$Site) %>% sort()), selected = "6"),
       
       dateRangeInput("date",
                      label =h4('Date range'),
@@ -99,28 +99,49 @@ server <- shinyServer(function(input, output) {
     
     
     if (input$site2 == 0) {
-          ggplot(wq, aes(x = Date, y = Measurement)) +
-          geom_point() +
-          scale_x_datetime(
-            breaks = date_breaks("month") ,
-            labels = date_format("%m/%Y")) +
-        theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
-              axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), text = element_text(size=12)) +
-              facet_wrap(~Site, ncol = 1) +
-              ylab("")
+      ggplot(wq, aes(x = Date, y = Measurement)) +
+        geom_point() +
+        scale_x_datetime(breaks = date_breaks("month") ,
+                         labels = date_format("%m/%Y")) +
+        theme(
+          panel.border = element_rect(
+            color = "black",
+            size = 0.5,
+            fill = NA,
+            linetype = "solid"
+          ),
+          axis.text.x = element_text(
+            angle = 90,
+            hjust = 1,
+            vjust = 0.5
+          ),
+          text = element_text(size = 12)
+        ) +
+        facet_wrap( ~ Site, ncol = 1) +
+        ylab("")
       
-         } else {
-            ggplot(wq, aes(x = Date, y = Measurement)) +
-            geom_point() +
-            scale_x_datetime(
-               breaks = date_breaks("month") ,
-               labels = date_format("%m/%Y")) +
-            theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, 
-            linetype="solid"),axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), 
-            text = element_text(size=12)) +
-            facet_wrap(~Site, ncol = 1) +
-            ylab("")
-         }
+    } else {
+      ggplot(wq, aes(x = Date, y = Measurement)) +
+        geom_point() +
+        scale_x_datetime(breaks = date_breaks("month") ,
+                         labels = date_format("%m/%Y")) +
+        theme(
+          panel.border = element_rect(
+            color = "black",
+            size = 0.5,
+            fill = NA,
+            linetype = "solid"
+          ),
+          axis.text.x = element_text(
+            angle = 90,
+            hjust = 1,
+            vjust = 0.5
+          ),
+          text = element_text(size = 12)
+        ) +
+        facet_wrap( ~ Site, ncol = 1) +
+        ylab("")
+    }
     
     })
   
