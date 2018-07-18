@@ -11,7 +11,6 @@ lab <- read.csv("data/lab.csv", header= T)
 
 wq$Date<- ymd_hms(wq$Date, tz="EST") %>%
   round_date("hour")
-# lab$Date <- as.Date(lab$Date)
 lab$Date <- paste(lab$Date, "12:00:00") %>%
   ymd_hms(tz="EST")  # Assume data taken from midday
 
@@ -79,8 +78,10 @@ ui <- fluidPage(
     
     mainPanel(
       width = 9,
+      h1("Continuous monitoring data"),
       plotOutput("sensorplot", height = "600px"),
-      plotOutput("labplot"))
+      h1("Point sampling data"),
+      plotOutput("labplot", height = "600px"))
     
   )
 )
@@ -94,12 +95,14 @@ ui <- fluidPage(
 
 server <- shinyServer(function(input, output) {
   
-  sensorplot <- reactive({
+  # Can directly use renderPlot instead of having reactive first
+  output$sensorplot <- renderPlot({
     site1 <- as.numeric(input$site1)
     site2 <- as.numeric(input$site2)
     startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="EST")
     endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="EST")
     
+    ### sensorplot
     # Filter WQ table
     wq1 <- wq %>% 
       filter(Site == site1 | Site == site2,
@@ -109,6 +112,7 @@ server <- shinyServer(function(input, output) {
     # Build a data table based on input daterange and temporal resolution
     # Note: We're building a table with all possible times first and merge it with
     # WQ table so that NAs and daterange of plot is preserved.
+    # NAs are required for line plot
     if (input$temp_res == "Hourly") {
       d <- seq(startDate, endDate, by = "hour")
       df <- data.frame(Site = rep(c(site1, site2), each = length(d)),
@@ -136,7 +140,7 @@ server <- shinyServer(function(input, output) {
       filter(Site != 0)
     
     # Base version of the plot
-    p <- ggplot(df, aes(x = Date, y = Measure)) +
+    sensorplot <- ggplot(df, aes(x = Date, y = Measure)) +
       geom_line() +
       # scale_x_date(
         # breaks = date_breaks("month") ,
@@ -154,67 +158,46 @@ server <- shinyServer(function(input, output) {
         select(Site, Date, Measure = input$variable, Sensor_Type)
 
       if (input$temp_res == "Hourly") {
-        p <- p + 
+        sensorplot <- sensorplot + 
           geom_point(data = lab1, aes(x = Date, y = Measure, colour = Sensor_Type), shape = 17, size = 3) +
           scale_color_manual(name = "Method", values = c("red", "blue"))
       } else if (input$temp_res == "Daily") {
-        p <- p + 
+        sensorplot <- sensorplot + 
           geom_point(data = lab1, aes(x = date(Date), y = Measure, colour = Sensor_Type), shape = 17, size = 3) +
           scale_color_manual(name = "Method", values = c("red", "blue"))
       }
       
     }
     
-    p
+    sensorplot
   })
   
-  # labplot <- reactive({
-  #   
-  #   lab <- lab %>% 
-  #     filter(Site == input$site1 | Site == input$site2,
-  #            Date >= input$date[1] & Date <= input$date[2]) %>% 
-  #     select(Site, Date, input$variable2, Sensor_Type) %>% 
-  #     gather("Variable", "Measurement", input$variable2)
-  #   
-  #   ggplot(lab, aes(x = Date, y = Measurement)) +
-  #     geom_point() +
-  #     scale_x_date(
-  #       breaks = date_breaks("month") ,
-  #       labels = date_format("%m/%Y")) +
-  #     theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
-  #     facet_wrap(~ Site + Sensor_Type, ncol = 2, scales = "free_y")
-  #   
-  #   
-  #   if (input$site2 == 0) {
-  #     ggplot(lab, aes(x = Date, y = Measurement)) +
-  #       geom_point() +
-  #       scale_x_date(
-  #         breaks = date_breaks("month") ,
-  #         labels = date_format("%m/%Y")) +
-  #       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid"),
-  #             axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), text = element_text(size=12)) +
-  #       facet_wrap(~ Site + Sensor_Type, ncol = 2, scales = "free_y") +
-  #       ylab("")
-  #     
-  #   } else {
-  #     ggplot(lab, aes(x = Date, y = Measurement)) +
-  #       geom_point() +
-  #       scale_x_date(
-  #         breaks = date_breaks("month") ,
-  #         labels = date_format("%m/%Y")) +
-  #       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, 
-  #                                         linetype="solid"),axis.text.x=element_text(angle=90,hjust=1,vjust=0.5), 
-  #             text = element_text(size=12)) +
-  #       facet_wrap(~ Site + Sensor_Type, ncol = 2, scales = "free_y") +
-  #       ylab("")
-  #   }
-  # })
-  
-  
-  output$sensorplot<-renderPlot({sensorplot()})
-  
-  
-  # output$labplot<-renderPlot({labplot()})
+  output$labplot<-renderPlot({
+    site1 <- as.numeric(input$site1)
+    site2 <- as.numeric(input$site2)
+    startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="EST")
+    endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="EST")
+    
+    lab1 <- lab %>% 
+      filter(Site == site1 | Site == site2,
+             Date >= startDate & Date <= endDate) %>% 
+      select(Site, Date, Measure = input$variable2, Sensor_Type)
+    
+    # Use similar trick as we did in sensorplot (e.g. build a df)
+    labplot <- ggplot(lab1, aes(x = Date, y = Measure, colour = Sensor_Type)) +
+      geom_point(shape = 17, size = 3) +
+      scale_color_manual(name = "Method", values = c("red", "blue")) +
+      scale_x_datetime(
+        #   breaks = date_breaks("month") ,
+        #   labels = date_format("%m/%Y")
+        limits = c(startDate, endDate)) +
+      theme_gray(base_size = 14) +
+      theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
+      facet_wrap(~ Site, ncol = 1, scales = "free_y") +
+      ylab(input$variable2)
+    
+    labplot
+  })
   
 })
 
