@@ -3,6 +3,7 @@ library("tidyverse")
 library("shinythemes")
 library("ggplot2")
 library("scales")
+library("lubridate")
 library("gridExtra")
 
 wq <- read.csv("data/wq.csv", header= T) %>%
