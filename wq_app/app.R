@@ -8,10 +8,12 @@ library("lubridate")
 
 wq <- read.csv("data/wq.csv", header= T) %>%
   filter(Site != 0)
+
 lab <- read.csv("data/lab.csv", header= T) 
 
 wq$Date<- ymd_hms(wq$Date, tz="EST") %>%
   round_date("hour")
+
 lab$Date <- paste(lab$Date, "12:00:00") %>%
   ymd_hms(tz="EST")  # Assume data taken from midday
 

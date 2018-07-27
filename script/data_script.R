@@ -38,6 +38,10 @@ wq$observation_datetime<- as.Date(wq$observation_datetime, tz="EST",usetz=TRUE)
 colnames(wq) <- c("ID", "Obs_Date", "In_Service", "Pressure", "Temperature", "Conductivity", "Salinity_raw", "Sound_velo", "Notes", "Site","Sensor_ID", "Salinity", "gmt_time", "Date")
 
 
+ggplot(data= wq,aes( x=Date, y= Salinity))+
+  geom_point()+
+  facet_wrap (~Site)
+
 ## Removing dates where sensors were malfunctioning in Site 2, oyster growth
 
 wq<- wq %>% 
@@ -51,7 +55,7 @@ wq<-wq %>%
 
 #Writting as a .csv for the Shiny App
 
-#write.csv(wq, file = "wq.csv")
+write.csv(wq, file = "wq.csv")
 
 ###Lakewatch Data, in .csv
 lab <- read.csv("wq_app/data/discrete_measurement.csv", header= T)
@@ -62,7 +66,7 @@ lab$Date <- as.Date(lab$Date)
 
 lab$Secchi<- (lab$Secchi/ 3.28)
 
-#write.csv(lab, file = "lab.csv")
+write.csv(lab, file = "lab.csv")
 
 
 
