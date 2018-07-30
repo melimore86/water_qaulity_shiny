@@ -1,11 +1,9 @@
-library(tidyverse)
-library(gridExtra)
-library(shinythemes)
-library(scales)
-library(rsconnect)
-library(lubridate)
-library(waterData)
-library(marelac)
+library("tidyverse")
+library("DBI")
+library("RMySQL")
+library("rsconnect")
+library("lubridate")
+library("marelac")
 
 # In case if there are too many connections open
 lapply(dbListConnections(MySQL()), dbDisconnect)
