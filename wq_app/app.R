@@ -6,6 +6,8 @@ library("scales")
 library("gridExtra")
 library("lubridate")
 
+#Make sure to be on the project directory before starting the Shiny App
+
 wq <- read.csv("data/wq.csv", header= T) %>%
   filter(Site != 0)
 

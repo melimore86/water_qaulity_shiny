@@ -3,7 +3,11 @@ library("DBI")
 library("RMySQL")
 library("rsconnect")
 library("lubridate")
-library("marelac")
+library("RMariaDB")
+
+#Using the developer DBI, but RMariaDB is not available for the newest R version in developer mode
+#devtools::install_github("r-dbi/DBI")
+
 
 # In case if there are too many connections open
 lapply(dbListConnections(MySQL()), dbDisconnect)
@@ -11,7 +15,7 @@ lapply(dbListConnections(MySQL()), dbDisconnect)
 
 ###Sensor Data
 
-con <- dbConnect(MySQL(),
+con <- dbConnect(RMariaDB::MariaDB(),
                  user="LCRoysterproject", 
                  password="HLLV6Pske0vTzhIZfSya",
                  dbname="LCRoysterproject", 
@@ -33,39 +37,47 @@ wq$observation_datetime<- as.Date(wq$observation_datetime, tz="EST",usetz=TRUE)
 #wq$sal <- convert_RtoS(wq$conductivity_mS_cm/standard, 
                        #t= wq$temperature_c, p= 0)
 
-colnames(wq) <- c("ID", "Obs_Date", "In_Service", "Pressure", "Temperature", "Conductivity", "Salinity_raw", "Sound_velo", "Notes", "Site","Sensor_ID", "Salinity", "gmt_time", "Date")
+colnames(wq) <- c("ID", "Obs_Date", "In_Service", "Pressure", "Temperature", "Conductivity", "Salinity_OG", "Sound_velo",  "Site","Sensor_ID", "Salinity","Date")
 
-
+# A quick ggplot test
 ggplot(data= wq,aes( x=Date, y= Salinity))+
   geom_point()+
   facet_wrap (~Site)
 
 ## Removing dates where sensors were malfunctioning in Site 2, oyster growth
-
 wq<- wq %>% 
   filter(!(Site == 2 & Salinity < 0.5))
 
 ## Removing dates where sensors were malfunctioning in Site 3
-
 wq<-wq %>% 
   filter(!(Site == 3 & Salinity < 4))
 
 
 #Writting as a .csv for the Shiny App
+write.csv(wq,file = "wq_app/data/wq.csv")
 
-write.csv(wq, file = "wq.csv")
 
-###Lakewatch Data, in .csv
-lab <- read.csv("wq_app/data/discrete_measurement.csv", header= T)
+###Lakewatch Data, from the MySQL workbench
 
-colnames(lab) <- c("Site", "Date", "Time_org", "Time_UTC", "Sun_code", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "DO", "Temperature","Conductivity", "Salinity", "Depth", "Sensor_Type")
 
-lab$Date <- as.Date(lab$Date)
+#Connecting to Database to update file 
+lab <- dbReadTable(conn = con, name = 'lcroyster_waterobservation')
 
+#Changing column names for an easier read in the Shiny App
+colnames(lab) <- c("ID", "Date", "Phosphorus", "Nitrogen", "Chlorophyll", "Secchi", "Color", "Temperature", "Conductivity", "Site", "Sensor_Type","Salinity", "Sun_Code", "DO", "Depth")
+
+#This will change the format to just yyyy/mm/dd
+#lab$Date <- as.Date(lab$Date)
+
+#Changing secchi from FT to Meters
 lab$Secchi<- (lab$Secchi/ 3.28)
 
-write.csv(lab, file = "lab.csv")
+# We need to update the sensor_type to the correct names for facetting, 4= YSI and 5= Lakewatch 
+lab$Sensor_Type[lab$Sensor_Type == "4"] <- "LAKEWATCH"
+lab$Sensor_Type[lab$Sensor_Type == "5"] <- "YSI"
 
+#Writting as a .csv for the Shiny App
+write.csv(lab, file = "wq_app/data/lab.csv")
 
 
 
