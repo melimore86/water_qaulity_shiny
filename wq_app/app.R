@@ -13,11 +13,11 @@ wq <- read.csv("data/wq.csv", header= T) %>%
 
 lab <- read.csv("data/lab.csv", header= T) 
 
-wq$Date<- ymd_hms(wq$Date, tz="EST") %>%
+wq$Date<- ymd_hms(wq$Date, tz="UTC") %>%
   round_date("hour")
 
 # Version 1
-lab$Date <- lab$Date %>% ymd_hms(tz="EST")
+#lab$Date <- lab$Date %>% ymd_hms(tz="EST")
 
 # Version 2
 # lab$Date <- lab$Date %>%
@@ -26,8 +26,11 @@ lab$Date <- lab$Date %>% ymd_hms(tz="EST")
 #   paste("12:00:00") %>%
 #   ymd_hms(tz="EST") # Assume all data taken midday regardless of recorded time
 
-
-lab$Site<- as.numeric(lab$Site)
+lab$Date <- lab$Date %>%
+  ymd_hms() %>%
+  date() %>%
+  paste("12:00:00") %>%
+  ymd_hms(tz="UTC")
 
 #### Front 
 
