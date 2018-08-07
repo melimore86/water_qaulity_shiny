@@ -1,9 +1,9 @@
 library("shiny")
 library("tidyverse")
-library("shinythemes")
+# library("shinythemes")
 library("ggplot2")
-library("scales")
-library("gridExtra")
+# library("scales")
+# library("gridExtra")
 library("lubridate")
 
 #Make sure to be on the project directory before starting the Shiny App
@@ -16,12 +16,21 @@ lab <- read.csv("data/lab.csv", header= T)
 wq$Date<- ymd_hms(wq$Date, tz="UTC") %>%
   round_date("hour")
 
+# Version 1
+#lab$Date <- lab$Date %>% ymd_hms(tz="EST")
+
+# Version 2
+# lab$Date <- lab$Date %>%
+#   ymd_hms() %>%
+#   date() %>%
+#   paste("12:00:00") %>%
+#   ymd_hms(tz="EST") # Assume all data taken midday regardless of recorded time
+
 lab$Date <- lab$Date %>%
   ymd_hms() %>%
   date() %>%
   paste("12:00:00") %>%
   ymd_hms(tz="UTC")
-
 
 #### Front 
 
