@@ -19,6 +19,8 @@ wq$Date<- ymd_hms(wq$Date, tz="EST") %>%
 lab$Date <- paste(lab$Date, "12:00:00") %>%
   ymd_hms(tz="EST")  # Assume data taken from midday
 
+lab$Site<- as.numeric(lab$Site)
+
 #### Front 
 
 ui <- fluidPage(
