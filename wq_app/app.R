@@ -1,6 +1,6 @@
 library("shiny")
 library("tidyverse")
-# library("shinythemes")
+library("shinythemes")
 library("ggplot2")
 # library("scales")
 # library("gridExtra")
@@ -211,7 +211,7 @@ server <- shinyServer(function(input, output) {
         limits = c(startDate, endDate)) +
       theme_gray(base_size = 14) +
       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
-      facet_wrap(~ Site, ncol = 1, scales = "free_y") +
+      facet_wrap(~ Site, ncol = 1) +
       ylab(input$variable2)
     
     labplot
