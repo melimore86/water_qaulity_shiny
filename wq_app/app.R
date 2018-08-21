@@ -42,6 +42,7 @@ factor_site_seq <- function (vec, site1, site2) {
   } else f <- vec
   return(f)
 }
+
 #### Front 
 
 ui <- fluidPage(
@@ -127,8 +128,8 @@ server <- shinyServer(function(input, output) {
   output$sensorplot <- renderPlot({
     site1 <- as.numeric(input$site1)
     site2 <- as.numeric(input$site2)
-    startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="EST")
-    endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="EST")
+    startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="UTC")
+    endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="UTC")
     
     ### sensorplot
     # Filter WQ table
@@ -210,8 +211,8 @@ server <- shinyServer(function(input, output) {
   output$labplot<-renderPlot({
     site1 <- as.numeric(input$site1)
     site2 <- as.numeric(input$site2)
-    startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="EST")
-    endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="EST")
+    startDate <- paste(input$date[1], "00:00:00") %>% ymd_hms(tz="UTC")
+    endDate <- paste(input$date[2], "23:00:00") %>% ymd_hms(tz="UTC")
     
     lab1 <- lab %>% 
       filter(Site == site1 | Site == site2,
