@@ -32,6 +32,16 @@ lab$Date <- lab$Date %>%
   paste("12:00:00") %>%
   ymd_hms(tz="UTC")
 
+# Function to make factors with levels based on site input and not numerical
+# so that ggplot facet display the sequence correctly.
+factor_site_seq <- function (vec, site1, site2) {
+  # The condition is required such that you don't declare levels of same values
+  # or when they pick "none"
+  if (site2 != 0 & site1 != site2) {
+    f <- factor(vec, levels = c(site1, site2))
+  } else f <- vec
+  return(f)
+}
 #### Front 
 
 ui <- fluidPage(
@@ -157,6 +167,10 @@ server <- shinyServer(function(input, output) {
     df <- df %>%
       filter(Site != 0)
     
+    # Adjusting Site's levels such that site1 goes before site2 regardless of
+    # numerical order.
+    df$Site <- factor_site_seq(df$Site, site1, site2)
+    
     # Base version of the plot
     sensorplot <- ggplot(df, aes(x = Date, y = Measure)) +
       geom_line() +
@@ -174,6 +188,9 @@ server <- shinyServer(function(input, output) {
         filter(Site == site1 | Site == site2,
                Date >= startDate & Date <= endDate) %>% 
         select(Site, Date, Measure = input$variable, Sensor_Type)
+      
+      # Same thing as we did for df$Site
+      lab1$Site <- factor_site_seq(lab1$Site, site1, site2)
 
       if (input$temp_res == "Hourly") {
         sensorplot <- sensorplot + 
@@ -188,7 +205,7 @@ server <- shinyServer(function(input, output) {
     }
     
     sensorplot
-  })
+})
   
   output$labplot<-renderPlot({
     site1 <- as.numeric(input$site1)
@@ -200,6 +217,9 @@ server <- shinyServer(function(input, output) {
       filter(Site == site1 | Site == site2,
              Date >= startDate & Date <= endDate) %>% 
       select(Site, Date, Measure = input$variable2, Sensor_Type)
+    
+    # Same thing as we did for sensorplot to force sequence of display
+    lab1$Site <- factor_site_seq(lab1$Site, site1, site2)
     
     # Use similar trick as we did in sensorplot (e.g. build a df)
     labplot <- ggplot(lab1, aes(x = Date, y = Measure, colour = Sensor_Type)) +
