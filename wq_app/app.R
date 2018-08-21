@@ -159,14 +159,16 @@ server <- shinyServer(function(input, output) {
     
     # Base version of the plot
     sensorplot <- ggplot(df, aes(x = Date, y = Measure)) +
+      ylab(input$variable) +
       geom_line() +
       # scale_x_date(
         # breaks = date_breaks("month") ,
         # labels = date_format("%m/%Y")) +
       theme_gray(base_size = 14) +
       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
-      facet_wrap(~Site, ncol = 1) +
-      ylab(input$variable)
+      facet_wrap(~Site, ncol = 1, labeller = label_both) +
+      theme(strip.text = element_text(size=25))
+    
     
     # Add feature if we want to overlay the point sample data
     if (input$overlay) {
@@ -203,6 +205,7 @@ server <- shinyServer(function(input, output) {
     
     # Use similar trick as we did in sensorplot (e.g. build a df)
     labplot <- ggplot(lab1, aes(x = Date, y = Measure, colour = Sensor_Type)) +
+      ylab(input$variable2) +
       geom_point(shape = 17, size = 3) +
       scale_color_manual(name = "Method", values = c("red", "blue")) +
       scale_x_datetime(
@@ -211,8 +214,9 @@ server <- shinyServer(function(input, output) {
         limits = c(startDate, endDate)) +
       theme_gray(base_size = 14) +
       theme(panel.border = element_rect(color = "black", size = 0.5, fill = NA, linetype="solid")) +
-      facet_wrap(~ Site, ncol = 1) +
-      ylab(input$variable2)
+      facet_wrap(~ Site, ncol = 1, labeller = label_both) +
+      theme(strip.text = element_text(size=25))
+      
     
     labplot
   })
